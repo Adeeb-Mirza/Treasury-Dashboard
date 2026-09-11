@@ -1,0 +1,1634 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Treasury Dashboard — Karandaaz Pakistan</title>
+<script>
+  (function(){
+    var saved = localStorage.getItem('treasuryTheme');
+    document.documentElement.setAttribute('data-theme', saved === 'dark' ? 'dark' : 'light');
+  })();
+</script>
+<style>
+  :root{
+    color-scheme: light;
+    --surface-1:      #fcfcfb;
+    --surface-2:      #ffffff;
+    --page:           #f2f6fc;
+    --text-primary:   #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted:     #898781;
+    --gridline:       #e1e0d9;
+    --border:         rgba(11,11,11,0.10);
+    --blue-50:        #eaf2fd;
+    --blue-100:       #cde2fb;
+    --blue-300:       #6da7ec;
+    --blue-500:       #2a78d6;
+    --blue-600:       #1c5cab;
+    --blue-700:       #104281;
+    --blue-900:       #0d2b52;
+    --good:           #0ca30c;
+    --good-bg:        #e6f6e6;
+    --warning:        #b9790c;
+    --warning-bg:     #fdf1da;
+    --cat-1: #2a78d6; --cat-2: #eb6834; --cat-3: #1baf7a; --cat-4: #eda100;
+    --cat-5: #e87ba4; --cat-6: #008300; --cat-7: #4a3aa7; --cat-8: #e34948;
+    --shadow-sm: 0 1px 2px rgba(16,66,129,0.06);
+    --shadow-md: 0 6px 20px rgba(16,66,129,0.10);
+    --radius: 14px;
+  }
+
+  :root[data-theme="dark"]{
+    color-scheme: dark;
+    --surface-1:      #1f1f1e;
+    --surface-2:      #242422;
+    --page:           #121214;
+    --text-primary:   #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted:     #8f8d87;
+    --gridline:       #2c2c2a;
+    --border:         rgba(255,255,255,0.10);
+    --blue-50:        #1c2c40;
+    --blue-100:       #203a5c;
+    --blue-300:       #3987e5;
+    --blue-500:       #3987e5;
+    --blue-600:       #6da7ec;
+    --blue-700:       #86b6ef;
+    --blue-900:       #cde2fb;
+    --good:           #17c317;
+    --good-bg:        rgba(23,195,23,0.16);
+    --warning:        #f2b33c;
+    --warning-bg:     rgba(242,179,60,0.16);
+    --cat-1: #3987e5; --cat-2: #d95926; --cat-3: #199e70; --cat-4: #c98500;
+    --cat-5: #d55181; --cat-6: #2fbf2f; --cat-7: #9085e9; --cat-8: #e66767;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.35);
+    --shadow-md: 0 6px 24px rgba(0,0,0,0.5);
+    --accent-text: #ffab40;
+  }
+
+  /* Dark mode: swap blue accent text for yellowish-orange for better visibility on dark surfaces */
+  :root[data-theme="dark"] .kpi .value,
+  :root[data-theme="dark"] .bar-value,
+  :root[data-theme="dark"] .badge.cat,
+  :root[data-theme="dark"] .btn-ghost:hover,
+  :root[data-theme="dark"] .section-head h2{
+    color: var(--accent-text);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--page);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a{color:inherit;}
+
+  /* ---------- Topbar ---------- */
+  .topbar{
+    position: sticky; top:0; z-index: 20;
+    background: linear-gradient(135deg, var(--blue-700), var(--blue-500));
+    color:#fff;
+    padding: 18px 24px;
+    box-shadow: var(--shadow-md);
+  }
+  .topbar-inner{
+    max-width: 1280px; margin:0 auto;
+    display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap;
+  }
+  .brand{display:flex; align-items:center; gap:12px;}
+  .brand-mark{
+    width:40px;height:40px;border-radius:10px;
+    background: rgba(255,255,255,0.16);
+    display:flex;align-items:center;justify-content:center;
+    font-size:20px;
+  }
+  .brand-text h1{margin:0;font-size:18px;font-weight:700;letter-spacing:.2px;}
+  .brand-text p{margin:0;font-size:12.5px;color:rgba(255,255,255,0.78);}
+  .topbar-meta{font-size:12.5px;color:rgba(255,255,255,0.85);text-align:right;}
+  .theme-toggle{
+    flex:none;width:38px;height:38px;border-radius:10px;
+    background:rgba(255,255,255,0.16);border:1px solid rgba(255,255,255,0.28);
+    color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    transition:background .15s ease;
+  }
+  .theme-toggle:hover{background:rgba(255,255,255,0.28);}
+
+  .sync-status{display:flex;align-items:center;gap:8px;font-size:12.5px;color:rgba(255,255,255,0.9);flex-wrap:wrap;justify-content:flex-end;}
+  .sync-dot{width:8px;height:8px;border-radius:50%;flex:none;background:rgba(255,255,255,0.4);}
+  .sync-dot.ok{background:#3ddc6a;box-shadow:0 0 6px rgba(61,220,106,0.7);}
+  .sync-dot.warn{background:#f2b33c;box-shadow:0 0 6px rgba(242,179,60,0.7);}
+  .sync-dot.err{background:#ff6b6b;box-shadow:0 0 6px rgba(255,107,107,0.7);}
+  .sync-dot.busy{background:#6db4ec;box-shadow:0 0 6px rgba(109,180,236,0.7);animation:sync-pulse 1s ease-in-out infinite;}
+  @keyframes sync-pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+  .sync-status .btn-ghost{background:rgba(255,255,255,0.16);border:1px solid rgba(255,255,255,0.28);color:#fff;}
+  .sync-status .btn-ghost:hover{background:rgba(255,255,255,0.28);}
+
+  main{max-width:1280px;margin:0 auto;padding:24px 24px 64px;}
+
+  section{margin-bottom:36px;}
+
+  .section-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap;}
+  .section-head h2{margin:0;font-size:19px;font-weight:700;}
+  .section-head .sub{font-size:12.5px;color:var(--text-muted);}
+
+  /* ---------- Cards / surfaces ---------- */
+  .panel{
+    background: var(--surface-2);
+    border:1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* ---------- KPI tiles ---------- */
+  .kpi-grid{
+    display:grid;
+    grid-template-columns: repeat(7, minmax(0,1fr));
+    gap:12px;
+    margin-bottom:16px;
+  }
+  .kpi{
+    padding:14px 14px;
+  }
+  .kpi .label{font-size:10.5px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.3px;}
+  .kpi .value{font-size:17px;font-weight:700;margin-top:6px;color:var(--blue-700);font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .kpi .value small{font-size:10.5px;font-weight:600;color:var(--text-muted);}
+
+  /* ---------- two column layout for breakdowns ---------- */
+  .dash-cols{
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:16px;
+    margin-bottom:16px;
+  }
+  @media (max-width: 820px){
+    .dash-cols{grid-template-columns: 1fr;}
+  }
+  .card-title{font-size:14px;font-weight:700;padding:16px 18px 4px;}
+  .card-body{padding:6px 18px 18px;}
+
+  .bar-row{display:flex;align-items:center;gap:10px;padding:6px 0;}
+  .bar-row .bar-label{flex:0 0 150px;font-size:12.5px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .bar-track{flex:1;height:10px;border-radius:6px;background:var(--blue-50);overflow:hidden;}
+  .bar-fill{height:100%;border-radius:6px;background:linear-gradient(90deg, var(--blue-300), var(--blue-500));}
+  .bar-value{flex:0 0 auto;font-size:12.5px;font-weight:700;color:var(--blue-700);font-variant-numeric:tabular-nums;min-width:58px;text-align:right;}
+
+  /* ---------- bank exposure table ---------- */
+  .table-wrap{overflow-x:auto;}
+  table.exposure{width:100%;border-collapse:collapse;font-size:12.5px;min-width:760px;}
+  table.exposure th{
+    text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.3px;
+    color:var(--text-muted);font-weight:700;padding:8px 10px;border-bottom:1px solid var(--gridline);
+    position:sticky;top:0;background:var(--surface-2);
+  }
+  table.exposure td{padding:9px 10px;border-bottom:1px solid var(--gridline);vertical-align:middle;color:var(--text-secondary);}
+  table.exposure tr:last-child td{border-bottom:none;}
+  table.exposure td.bank-name{color:var(--text-primary);font-weight:600;}
+  .util-cell{display:flex;align-items:center;gap:8px;min-width:150px;}
+  .util-track{flex:1;height:8px;border-radius:5px;background:var(--blue-50);overflow:hidden;}
+  .util-fill{height:100%;border-radius:5px;}
+  .util-pct{font-variant-numeric:tabular-nums;font-weight:700;min-width:40px;text-align:right;}
+  .badge{
+    display:inline-flex;align-items:center;gap:5px;
+    padding:3px 9px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap;
+  }
+  .badge.good{background:var(--good-bg);color:var(--good);}
+  .badge.warning{background:var(--warning-bg);color:var(--warning);}
+  .badge.cat{background:var(--blue-50);color:var(--blue-700);}
+
+  /* ---------- KRN Position disclosure ---------- */
+  .pos-toggle{
+    display:inline-flex;align-items:center;gap:6px;
+    background:none;border:none;padding:2px 6px 2px 2px;margin:-2px 0;
+    font:inherit;font-variant-numeric:tabular-nums;color:var(--blue-700);
+    font-weight:700;cursor:pointer;border-radius:7px;
+  }
+  .pos-toggle:hover{background:var(--blue-50);}
+  .pos-toggle .caret{font-size:10px;line-height:1;color:var(--text-muted);}
+  :root[data-theme="dark"] .pos-toggle{color:var(--accent-text);}
+
+  table.exposure tr.cat-detail td{padding:0 10px 12px;border-bottom:1px solid var(--gridline);}
+  .cat-panel{
+    background:var(--blue-50);border-radius:10px;padding:10px 14px;
+    max-width:520px;
+  }
+  .cat-head{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;
+    color:var(--text-muted);margin-bottom:6px;}
+  .cat-line{display:flex;justify-content:space-between;gap:16px;padding:3px 0;font-size:12.5px;}
+  .cat-line .cat-name{color:var(--text-secondary);}
+  .cat-line .cat-amt{font-variant-numeric:tabular-nums;font-weight:700;color:var(--text-primary);}
+  .cat-line.cat-total{border-top:1px solid var(--border);margin-top:5px;padding-top:6px;}
+  .cat-line.cat-total .cat-name{color:var(--text-primary);font-weight:700;}
+  .cat-note{margin-top:7px;font-size:11.5px;line-height:1.45;color:var(--text-muted);}
+
+  .dash-footnote{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+    padding:12px 18px;font-size:12px;color:var(--text-muted);
+    border-top:1px solid var(--gridline);
+  }
+
+  .btn{
+    display:inline-flex;align-items:center;gap:6px;
+    border:none;border-radius:10px;padding:10px 16px;font-size:13.5px;font-weight:700;
+    cursor:pointer;transition:transform .05s ease, box-shadow .15s ease;
+  }
+  .btn:active{transform:scale(0.97);}
+  .btn-ghost{background:var(--surface-2);color:var(--text-secondary);border:1px solid var(--border);}
+  .btn-ghost:hover{background:var(--blue-50);color:var(--blue-700);}
+  .btn-sm{padding:8px 12px;font-size:12.5px;}
+
+  footer.appfoot{max-width:1280px;margin:0 auto;padding:0 24px 40px;font-size:12px;color:var(--text-muted);text-align:center;}
+
+  @media (max-width:600px){
+    main{padding:16px 14px 48px;}
+    .topbar{padding:14px 16px;}
+    .kpi .value{font-size:19px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="brand-mark">🏦</div>
+      <div class="brand-text">
+        <h1>Treasury Dashboard</h1>
+        <p>Karandaaz Pakistan · Bank Report &amp; Gates Foundation Programs</p>
+      </div>
+    </div>
+    <div class="topbar-meta">
+      Report as on <strong id="reportDate">August 4, 2026</strong><br>
+      Source: data/Bank Report.xlsx
+    </div>
+    <div class="sync-status" id="syncStatus">
+      <span class="sync-dot" id="syncDot"></span>
+      <span id="syncStatusText">Not connected</span>
+      <button type="button" class="btn btn-ghost btn-sm" id="connectExcelBtn">Connect data folder</button>
+    </div>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode" title="Toggle dark mode">
+      <svg id="iconSun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      <svg id="iconMoon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    </button>
+  </div>
+</header>
+
+<main>
+
+  <!-- ============ HIGH-LEVEL BANK REPORT DASHBOARD ============ -->
+  <section id="bankDashboard">
+    <div class="section-head">
+      <span class="sub">Key metrics summary, funds category, GF programs &amp; bank-wise exposure</span>
+    </div>
+
+    <div class="kpi-grid" id="kpiGrid"></div>
+
+    <div class="dash-cols">
+      <div class="panel">
+        <div class="card-title">Funds Category (PKR Mn)</div>
+        <div class="card-body" id="fundsCategoryChart"></div>
+      </div>
+      <div class="panel">
+        <div class="card-title">Program Gates Foundation — Equivalent PKR Amount</div>
+        <div class="card-body" id="gfProgramChart"></div>
+        <div class="dash-footnote">
+          <span>USD conversion rate: <strong id="gfProgramRate">—</strong></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="card-title">Bank-Wise Exposure vs Institutional Limits</div>
+      <div class="card-body table-wrap">
+        <table class="exposure" id="exposureTable">
+          <thead>
+            <tr>
+              <th>Bank</th><th>KRN Category</th><th>Rating</th><th>CAR</th>
+              <th>Bank Limit (PKR Mn)</th><th>KRN Position (PKR Mn)</th><th>Utilization</th><th>Status</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="dash-footnote">
+        <span>Snapshot as of <span id="snapshotDate">August 4, 2026</span> · figures in PKR Millions unless noted · KRN Position excludes T-Bill holdings and escrow balances</span>
+        <span id="exposureCount">16 banking relationships tracked</span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="card-title">T-Bills Holdings — Buy &amp; Sell (Primary/Secondary)</div>
+      <div class="card-body table-wrap">
+        <table class="exposure" id="tbillsTable">
+          <thead>
+            <tr>
+              <th>Sr</th><th>Bank</th><th>Account Title</th><th>Type</th>
+              <th>Purchase Date</th><th>Maturity Date</th><th>Days to Maturity</th>
+              <th>Profit Rate (p.a.)</th><th>Cheque Value (PKR Mn)</th><th>Face Value / Maturity Amt (PKR Mn)</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="dash-footnote">
+        <span>Sub-total (Cheque Value): <strong id="tbillsSubtotal">—</strong></span>
+        <span id="tbillsCount"></span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="card-title">Escrow Funds — Accounts Breakdown</div>
+      <div class="card-body table-wrap">
+        <table class="exposure" id="escrowTable">
+          <thead>
+            <tr>
+              <th>Sr</th><th>Bank</th><th>Programme</th><th>Account Title</th><th>Nature</th>
+              <th>Category</th><th>Account No.</th><th>IBAN</th><th>Account Type</th>
+              <th>Profit Rate (p.a.)</th><th>Available Balance (PKR Mn)</th><th>Principal Amount (PKR Mn)</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="dash-footnote">
+        <span>Total (all PKR): <strong id="escrowSubtotal">—</strong></span>
+        <span id="escrowCount"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PROGRAMS WITH GATES FOUNDATION ============ -->
+  <section id="gfProgramsSection">
+    <div class="section-head">
+      <h2>Programs with Gates Foundation</h2>
+      <span class="sub">Programme-wise USD / PKR balances and the bank each is placed with</span>
+    </div>
+    <div class="panel">
+      <div class="card-body table-wrap">
+        <table class="exposure" id="gfProgramsTable">
+          <thead>
+            <tr><th>Program</th><th style="text-align:right">Amount (US$)</th><th style="text-align:right">Amount (PKR)</th><th style="text-align:right">Equivalent PKR Amount</th><th>Bank</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="dash-footnote">
+        <span>Total: <strong id="gfProgramsSubtotal">—</strong></span>
+        <span>USD conversion rate: <strong id="gfProgramsRate">—</strong></span>
+        <span id="gfProgramsCount"></span>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="appfoot">Treasury Dashboard | For internal use only</footer>
+
+<script src="vendor/xlsx.full.min.js"></script>
+<script>
+/* =========================================================
+   HIGH-LEVEL BANK REPORT DATA
+   Extracted from data/Bank Report.xlsx ("Dashboard" sheet), as on Aug 4, 2026
+   ========================================================= */
+let REPORT_DATE = "August 4, 2026";
+function setReportDate(dateLike){
+  const d = (dateLike instanceof Date) ? dateLike : new Date(dateLike);
+  if (isNaN(d.getTime())) return;
+  REPORT_DATE = d.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+  const a = document.getElementById('reportDate');
+  const b = document.getElementById('snapshotDate');
+  if (a) a.textContent = REPORT_DATE;
+  if (b) b.textContent = REPORT_DATE;
+}
+
+const KPIS = [
+  { label: "Total Cash at Bank", value: 18739.8, unit: "PKR Mn" },
+  { label: "Savings Accounts",   value: 10320.7, unit: "PKR Mn" },
+  { label: "Term Deposits",      value: 3659.7,  unit: "PKR Mn" },
+  { label: "T-Bills",            value: 4486.4,  unit: "PKR Mn" },
+  { label: "Escrow Funds",       value: 220.0,   unit: "PKR Mn" },
+  { label: "Total GF Funds",     value: 8597530, unit: "USD" },
+];
+
+const FUNDS_CATEGORY = [
+  { category: "OSR Funds",              amount: 9335.0, pct: 49.8 },
+  { category: "LR Funds",               amount: 5521.1, pct: 29.5 },
+  { category: "BMGF Funds",             amount: 2391.8, pct: 12.8 },
+  { category: "Provident Funds",        amount: 391.4,  pct: 2.1 },
+  { category: "WV Greenfin",            amount: 338.1,  pct: 1.8 },
+  { category: "RPA Accounts",           amount: 272.9,  pct: 1.5 },
+  { category: "FIP",                    amount: 284.4,  pct: 1.5 },
+  { category: "Operational Funds",      amount: 60.3,   pct: 0.3 },
+  { category: "Gratuity",               amount: 45.0,   pct: 0.2 },
+  { category: "Investment/CDEL Funds",  amount: 99.6,   pct: 0.5 },
+];
+
+/* Cash tied up in Gates Foundation programs, Provident Fund, Gratuity, and
+   FIP — subtracted from Total Cash at Bank to get "Total Cash excluding
+   Grants". The Gates Foundation bucket is labeled "BMGF Funds" here but
+   "GF Funds" in BANK_CATEGORY_SPLIT — both patterns are matched since they
+   refer to the same category. */
+function grantsAndBenefitsTotal(){
+  const patterns = [/\bgf funds\b/i, /bmgf/i, /gates foundation/i, /provident/i, /gratuity/i, /\bfip\b/i];
+  return FUNDS_CATEGORY
+    .filter(f => patterns.some(p => p.test(f.category)))
+    .reduce((sum, f) => sum + f.amount, 0);
+}
+
+/* Fallback, shown before the first sync (or if it fails). Sourced from the
+   Dashboard sheet's own "Program Gates Foundation" table, which as of this
+   writing reads "Funds available in USD (A)" / "Funds available in PKR account
+   (B)" — two separate money pools, both already in full rupees/dollars, not
+   millions. (It used to be "USD Amount" / "Equivalent PKR (M)" — a currency
+   conversion expressed in millions — which is why this list, and the PKR-scale
+   handling in renderGFProgramsTable(), used to look very different.) */
+const GF_PROGRAM_USD = [
+  { program: "Ehsaas",                                  usd: 185792,  pkr: 23793676 },
+  { program: "CCT",                                     usd: 2013882, pkr: 11023734 },
+  { program: "PCDFI",                                   usd: 0,       pkr: 46146115 },
+  { program: "CICO",                                    usd: 833181,  pkr: 0 },
+  { program: "G2P",                                     usd: 1410688, pkr: 0 },
+  { program: "Buna Raast",                               usd: 1131254, pkr: 1811516 },
+  { program: "Federal Bureau of Revenue Digitization",   usd: 1652150, pkr: 12118107 },
+];
+
+/* Fallback; overwritten by parseUsdConversionRateFromSheet on sync (Dashboard!H8,
+   labelled "USD Conversion Rate"). Used to independently compute the "Equivalent
+   PKR Amount" column in the GF Programs table. */
+let USD_CONVERSION_RATE = 278.2;
+
+/* A programme's combined PKR exposure: its native PKR account balance (g.pkr)
+   plus its USD balance converted to PKR at the live rate. Shared by the GF
+   Programs chart and the "Equivalent PKR Amount" column of the GF Programs
+   table, so the two can't silently drift apart the way they once did. */
+function gfEquivPkr(g){ return (g.pkr||0) + (g.usd||0) * USD_CONVERSION_RATE; }
+
+/* Which bank each GF programme's money is placed with. Keyed by a canonical short
+   code rather than the exact programme-name string, because the live sheet's names
+   ("CCT", "Ehsaas") differ slightly from this fallback's ("CCT Funds", "Ehsaas
+   Funds") — the same naming drift already present in GF_PROGRAM_USD above.
+   PCDFI Funds and PCDFI - McKinsey have no dedicated account anywhere in the
+   workbook — their money sits inside generic, unlabeled GF accounts at UBL and
+   Bank Alfalah alongside other pooled money not split by programme, so they are
+   deliberately shown as pooled rather than attributed to one bank. */
+let GF_PROGRAM_BANK = {
+  fbr: 'Bank Alfalah Ltd', cct: 'Bank Alfalah Ltd', raast: 'Bank Alfalah Ltd',
+  g2p: 'Bank Alfalah Ltd', cico: 'Bank Alfalah Ltd', ehsaas: 'Bank Alfalah Ltd',
+  pcdfi: 'UBL / Bank Alfalah Ltd (pooled — not tracked per programme)',
+  mckinsey: 'UBL / Bank Alfalah Ltd (pooled — not tracked per programme)',
+};
+const GF_PROGRAM_KEYS = [
+  ['mckinsey', /mckinsey/i],
+  ['fbr',      /\bfbr\b|revenue\s+digiti[sz]ation/i],
+  ['cico',     /\bcico\b/i],
+  ['raast',    /\braast\b/i],
+  ['g2p',      /\bg2p\b/i],
+  ['ehsaas',   /\behsaas\b/i],
+  ['cct',      /\bcct\b|\bc\.?t\b/i],
+  ['pcdfi',    /\bpcdfi\b/i],
+];
+/* Classifies either a GF_PROGRAM_USD programme name or a bank account title down to
+   one of the keys above. mckinsey is checked before pcdfi since "PCDFI - McKinsey"
+   contains both substrings. */
+function gfProgramKey(text){
+  const s = String(text == null ? '' : text);
+  for (const [key, re] of GF_PROGRAM_KEYS) if (re.test(s)) return key;
+  return null;
+}
+
+const BANK_EXPOSURE = [
+  { bank: "Faysal Bank",                 category:"A", rating:"AA+", car:"16.1%", limit:11232.6, position:7302.2, util:65.0, status:"warning-near" },
+  { bank: "SAMBA Bank",                  category:"B", rating:"AA",  car:"24.6%", limit:1178.0,  position:1139.0, util:96.7, status:"warning" },
+  { bank: "MCB Islamic Bank",            category:"B", rating:"A+",  car:"20.3%", limit:2171.5,  position:1010.1, util:46.5, status:"ok" },
+  { bank: "Bank Alfalah Ltd - FCY",      category:"A", rating:"AAA", car:"17.9%", limit:19209.6, position:2246.9, util:11.7, status:"ok" },
+  { bank: "Bank Islami Pakistan Limited",category:"B", rating:"AA-", car:"15.4%", limit:4657.1,  position:502.3,  util:10.8, status:"ok" },
+  { bank: "Bank Alfalah Ltd",            category:"A", rating:"AAA", car:"17.9%", limit:19209.6, position:1511.4, util:7.9,  status:"ok" },
+  { bank: "JS Bank Limited",             category:"B", rating:"AA",  car:"13.9%", limit:3715.7,  position:58.4,   util:1.6,  status:"ok" },
+  { bank: "Bank of Punjab",              category:"B", rating:"AA+", car:"17.4%", limit:7855.7,  position:100.0,  util:1.3,  status:"ok" },
+  { bank: "United Bank Ltd",             category:"A", rating:"AAA", car:"23.6%", limit:44431.0, position:331.2,  util:0.7,  status:"ok" },
+  { bank: "Soneri Bank Ltd",             category:"B", rating:"AA-", car:"16.3%", limit:2659.5,  position:21.7,   util:0.8,  status:"ok" },
+  { bank: "National Bank of Pakistan",   category:"A", rating:"AAA", car:"28.2%", limit:51385.0, position:100.0,  util:0.2,  status:"ok" },
+  { bank: "Meezan Bank Ltd",             category:"A", rating:"AAA", car:"23.6%", limit:27279.6, position:46.4,   util:0.2,  status:"ok" },
+  { bank: "Habib Metropolitan",          category:"A", rating:"AA",  car:"18.3%", limit:12123.6, position:1.6,    util:0.0,  status:"ok" },
+  { bank: "Habib Bank Ltd",              category:"A", rating:"AAA", car:"18.4%", limit:46407.6, position:0.3,    util:0.0,  status:"ok" },
+  { bank: "Allied Bank Ltd",             category:"A", rating:"AAA", car:"31.2%", limit:25264.1, position:0.1,    util:0.0,  status:"ok" },
+  { bank: "Askari Bank Ltd",             category:"B", rating:"AA+", car:"22.7%", limit:11311.9, position:0.0,    util:0.0,  status:"ok" },
+];
+
+/* Relationships kept off the Bank-Wise Exposure table. Named deliberately
+   rather than derived from a zero position: the list changes only when someone
+   decides it should. The flip side is that it is permanent — if one of these
+   banks later carries a real balance against its limit, it stays hidden until
+   this list is edited. Names must match the exposure table's own spelling,
+   which comes from Dashboard!B27:B42. */
+const EXPOSURE_HIDDEN_BANKS = [
+  'Askari Bank Ltd',
+  'Bank of Punjab',
+  'National Bank of Pakistan',
+];
+const HIDDEN_BANK_KEYS = new Set(EXPOSURE_HIDDEN_BANKS.map(n => n.trim().toLowerCase()));
+
+const TBILLS_DETAIL = [
+  { sr: 1, bank: "UBL",  accountTitle: "Karandaaz Pakistan Own Source Revenue", type: "Secondary", purchaseDate: "2026-03-05", maturityDate: "2027-03-04", rate: 0.1092, chequeValue: 499954594,  faceValue: 554400000,  daysToMaturity: 364 },
+  { sr: 2, bank: "UBL",  accountTitle: "Karandaaz Pakistan Own Source Revenue", type: "Secondary", purchaseDate: "2026-03-05", maturityDate: "2026-09-03", rate: 0.1065, chequeValue: 499950711,  faceValue: 526500000,  daysToMaturity: 182 },
+  { sr: 4, bank: "UBL",  accountTitle: "Karandaaz Pakistan Own Source Revenue", type: "Primary",   purchaseDate: "2026-05-14", maturityDate: "2026-08-06", rate: 0.1201, chequeValue: 486554000,  faceValue: 500000000,  daysToMaturity: 84  },
+  { sr: 5, bank: "UBL",  accountTitle: "Karandaaz Pakistan Own Source Revenue", type: "Buy Sell",  purchaseDate: "2026-07-28", maturityDate: "2026-08-19", rate: 0.1173, chequeValue: 1999987518, faceValue: 2014127558, daysToMaturity: 22  },
+  { sr: 6, bank: "HMBL", accountTitle: "Karandaaz Pakistan Own Source Revenue", type: "Buy Sell",  purchaseDate: "2026-07-27", maturityDate: "2026-08-13", rate: 0.1172, chequeValue: 999983711,  faceValue: 1005442329, daysToMaturity: 17  },
+];
+
+const ESCROW_DETAIL = [
+  { sr: 1, bank: "NBP",  programme: "EAGR", accountTitle: "National Bank of Pakistan Women Ventures Escrow - Karandaaz Pakistan", nature: "DFID- PKR", category: "ICF", accountNo: "3180459344",       iban: "",                          accountType: "Escrow- Saving", rate: 0.0845, currency: "PKR", availableBalance: 100000000, principalAmount: 100000000 },
+  { sr: 2, bank: "BAFL", programme: "EAGR", accountTitle: "BAFL ICF-3 Escrow",                                                    nature: "DFID- PKR", category: "ICF", accountNo: "00351007935778",   iban: "",                          accountType: "Escrow- Saving", rate: 0.11,   currency: "PKR", availableBalance: 20000000,  principalAmount: 20000000  },
+  { sr: 3, bank: "BOP",  programme: "EAGR", accountTitle: "KARANDAAZ PAKISTAN & BANK OF PUNJAB - ESCROW ACCOUNT",                  nature: "WV",         category: "ICF", accountNo: "6510357085300010", iban: "PK92BPUN6510357085300010", accountType: "Escrow- Saving", rate: 0.095,  currency: "PKR", availableBalance: 100000000, principalAmount: 100000000 },
+];
+
+/* Fund-category composition of each bank's holdings, in PKR Mn.
+   Nine categories come from the treasury team's own "Breakup" sections on the
+   "Bank Report KRN" sheet — their LR/OSR attribution is a judgement that is not
+   recoverable from the account rows, where both read Nature "OSR A/C".
+   GF Funds has no breakup section, so it is derived from GF-tagged accounts.
+   Escrow is deliberately absent: it is excluded from KRN Position, so listing it
+   here would put holdings and the position on different bases. It is still
+   reported in full by the Escrow Funds KPI and the escrow table.
+   NB these are holdings; they do not sum to KRN Position, which is a
+   limit-monitoring figure computed on a different basis. */
+let BANK_CATEGORY_SPLIT = {
+  "Allied Bank Ltd": [
+    { category: "LR Funds", amount: 0.08 }
+  ],
+  "Bank Alfalah Ltd": [
+    { category: "LR Funds", amount: 1999.988 },
+    { category: "OSR Funds", amount: 705.336 },
+    { category: "Provident Funds", amount: 219.409 },
+    { category: "Operational Funds", amount: 144.672 },
+    { category: "RPA Accounts", amount: 107.699 },
+    { category: "GF Funds", amount: 73.666 },
+    { category: "Investment/CDEL Funds", amount: 68.312 },
+    { category: "FIP", amount: 10.642 }
+  ],
+  "Bank Alfalah Ltd - FCY": [
+    { category: "GF Funds", amount: 2244.114 }
+  ],
+  "Bank Islami Pakistan Limited": [
+    { category: "OSR Funds", amount: 502.325 }
+  ],
+  "Faysal Bank": [
+    { category: "OSR Funds", amount: 5854.515 },
+    { category: "WV Greenfin", amount: 222.617 },
+    { category: "Provident Funds", amount: 172.665 },
+    { category: "LR Funds", amount: 31.277 }
+  ],
+  "Habib Bank Ltd": [
+    { category: "LR Funds", amount: 0.267 }
+  ],
+  "Habib Metropolitan": [
+    { category: "OSR Funds", amount: 999.984 },
+    { category: "LR Funds", amount: 1.636 },
+    { category: "RPA Accounts", amount: 0.074 },
+    { category: "FIP", amount: 0 },
+    { category: "Operational Funds", amount: 0 }
+  ],
+  "JS Bank Limited": [
+    { category: "RPA Accounts", amount: 53.042 },
+    { category: "Operational Funds", amount: 3.823 }
+  ],
+  "MCB Islamic Bank": [
+    { category: "OSR Funds", amount: 1000.0 },
+    { category: "RPA Accounts", amount: 13.112 }
+  ],
+  "Meezan Bank Ltd": [
+    { category: "RPA Accounts", amount: 297.462 }
+  ],
+  "SAMBA Bank": [
+    { category: "LR Funds", amount: 1032.015 },
+    { category: "WV Greenfin", amount: 104.715 }
+  ],
+  "Soneri Bank Ltd": [
+    { category: "RPA Accounts", amount: 21.723 }
+  ],
+  "United Bank Ltd": [
+    { category: "LR Funds", amount: 2455.823 },
+    { category: "FIP", amount: 270.857 },
+    { category: "OSR Funds", amount: 53.179 },
+    { category: "Gratuity", amount: 45.026 },
+    { category: "GF Funds", amount: 1.708 },
+    { category: "Investment/CDEL Funds", amount: 1.286 },
+    { category: "Provident Funds", amount: 1.003 },
+    { category: "WV Greenfin", amount: 0.005 }
+  ]
+};
+
+function fmt(n, decimals=1){
+  return Number(n).toLocaleString(undefined, {minimumFractionDigits:decimals, maximumFractionDigits:decimals});
+}
+const MONTH_ABBR = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function fmtDate(v){
+  if (v == null || v === '') return '—';
+  const d = (v instanceof Date) ? v : new Date(v);
+  if (isNaN(d.getTime())) return String(v);
+  const dd = String(d.getUTCDate()).padStart(2,'0');
+  return `${dd}-${MONTH_ABBR[d.getUTCMonth()]}-${String(d.getUTCFullYear()).slice(-2)}`;
+}
+function fmtPct(fraction, decimals=2){
+  return (Number(fraction)*100).toFixed(decimals) + '%';
+}
+
+/* ---------- render KPI tiles ---------- */
+function renderKPIs(){
+  const grid = document.getElementById('kpiGrid');
+  const tiles = KPIS.slice();
+  const total = KPIS[0];
+  if (total) {
+    tiles.splice(1, 0, {
+      label: "Total Cash excluding Grants",
+      value: total.value - grantsAndBenefitsTotal(),
+      unit: total.unit
+    });
+  }
+  grid.style.gridTemplateColumns = `repeat(${tiles.length}, minmax(0,1fr))`;
+  grid.innerHTML = tiles.map(k => `
+    <div class="panel kpi">
+      <div class="label">${k.label}</div>
+      <div class="value">${k.unit === 'USD' ? '$' + Number(k.value).toLocaleString() : fmt(k.value)} <small>${k.unit}</small></div>
+    </div>
+  `).join('');
+  document.getElementById('reportDate').textContent = REPORT_DATE;
+  const snap = document.getElementById('snapshotDate');
+  if (snap) snap.textContent = REPORT_DATE;
+}
+
+/* ---------- render funds category bar list ---------- */
+function renderFundsCategory(){
+  const max = Math.max(...FUNDS_CATEGORY.map(f=>f.amount));
+  const el = document.getElementById('fundsCategoryChart');
+  el.innerHTML = FUNDS_CATEGORY.slice().sort((a,b)=>b.amount-a.amount).map(f => `
+    <div class="bar-row">
+      <div class="bar-label" title="${f.category}">${f.category}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(f.amount/max*100).toFixed(1)}%"></div></div>
+      <div class="bar-value">${fmt(f.amount)}</div>
+    </div>
+  `).join('');
+}
+
+/* ---------- render GF program bar list ---------- */
+function renderGFProgram(){
+  const max = Math.max(...GF_PROGRAM_USD.map(gfEquivPkr));
+  const el = document.getElementById('gfProgramChart');
+  el.innerHTML = GF_PROGRAM_USD.slice().sort((a,b)=>gfEquivPkr(b)-gfEquivPkr(a)).map(g => `
+    <div class="bar-row">
+      <div class="bar-label" title="${g.program}">${g.program}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${(gfEquivPkr(g)/max*100).toFixed(1)}%"></div></div>
+      <div class="bar-value">${Number(gfEquivPkr(g)).toLocaleString(undefined, {maximumFractionDigits: 0})}</div>
+    </div>
+  `).join('');
+  document.getElementById('gfProgramRate').textContent = fmt(USD_CONVERSION_RATE, 2) + ' PKR / US$';
+}
+
+/* ---------- render GF programs + bank table ---------- */
+function renderGFProgramsTable(){
+  const tbody = document.querySelector('#gfProgramsTable tbody');
+  const rows = GF_PROGRAM_USD.slice().sort((a,b)=>b.pkr-a.pkr);
+  if (!rows.length){
+    tbody.innerHTML = '<tr><td colspan="5" style="padding:20px;color:var(--text-muted)">No Gates Foundation programs found.</td></tr>';
+  } else {
+    tbody.innerHTML = rows.map(g => `
+      <tr>
+        <td class="bank-name">${escapeHtml(g.program)}</td>
+        <td style="text-align:right">$${Number(g.usd||0).toLocaleString(undefined, {maximumFractionDigits: 0})}</td>
+        <td style="text-align:right">${Number(g.pkr||0).toLocaleString(undefined, {maximumFractionDigits: 0})}</td>
+        <td style="text-align:right">${Number(gfEquivPkr(g)).toLocaleString(undefined, {maximumFractionDigits: 0})}</td>
+        <td>${escapeHtml(GF_PROGRAM_BANK[gfProgramKey(g.program)] || 'Not separately tracked')}</td>
+      </tr>`).join('');
+  }
+  const totalUsd = rows.reduce((s,g)=>s+(g.usd||0),0);
+  const totalPkr = rows.reduce((s,g)=>s+(g.pkr||0),0);
+  /* Equivalent PKR Amount's total: column 2's total converted to PKR plus
+     column 3's total — matches gfEquivPkr() above summed across rows. */
+  const totalEquivPkr = (totalUsd * USD_CONVERSION_RATE) + totalPkr;
+  document.getElementById('gfProgramsSubtotal').textContent =
+    '$' + totalUsd.toLocaleString(undefined, {maximumFractionDigits: 0}) + ' · ' +
+    Number(totalPkr).toLocaleString(undefined, {maximumFractionDigits: 0}) + ' PKR · ' +
+    Number(totalEquivPkr).toLocaleString(undefined, {maximumFractionDigits: 0}) + ' PKR (total)';
+  document.getElementById('gfProgramsRate').textContent = fmt(USD_CONVERSION_RATE, 2) + ' PKR / US$';
+  document.getElementById('gfProgramsCount').textContent = rows.length + ' program(s)';
+}
+
+/* ---------- render bank exposure table ---------- */
+/* Which bank rows have their category breakdown open. Kept across re-renders so
+   a sync doesn't slam a row shut while it is being read. */
+const expandedBanks = new Set();
+
+/* Escrow principal held at each bank, in PKR Mn, keyed by the name the exposure
+   table uses. The escrow sheet writes banks as short codes, so it goes through the
+   same alias map as the fund-category split. Principal, not available balance:
+   'Institutional Limit'!J37 points at 'Escrow ICF' column Q, which is Principal. */
+function escrowByBank(){
+  const out = {};
+  ESCROW_DETAIL.forEach(e => {
+    const bank = bankNameFor(e.bank, e.currency);
+    const amount = (typeof e.principalAmount === 'number' ? e.principalAmount : 0) / 1000000;
+    if (!bank || !amount) return;
+    out[bank] = (out[bank] || 0) + amount;
+  });
+  return out;
+}
+
+/* Escrow money is ring-fenced for a counterparty, so it must not consume a bank's
+   institutional limit. The workbook folds it into KRN Position only for banks that
+   hold nothing else — 'Institutional Limit'!J37 reads 'Escrow ICF'!Q7 for NBP, and
+   J49 hardcodes Bank of Punjab's 100 Mn. Bank Alfalah also holds escrow, but its
+   J44 sums savings and RPA rows only, so that 20 Mn was never in the position and
+   deducting it would understate the bank.
+
+   Hence the exact-match test below: deduct only when a bank's whole position is
+   escrow. A mixed position means the workbook changed shape, and this page reads
+   values, not formulas, so it cannot tell how much is inside — it leaves the
+   figure alone rather than guess. That failure is silent: if NBP or BOP ever opens
+   a savings account alongside its escrow, the deduction quietly stops happening.
+
+   T-Bills need no deduction at all. No position formula on that sheet touches the
+   T-bill rows ('Bank Report KRN' P125:P131) — UBL's position is 373 Mn against
+   4,456 Mn of T-bills — so they are already outside every figure here. */
+function adjustedExposure(){
+  const escrow = escrowByBank();
+  return BANK_EXPOSURE.map(b => {
+    const held = escrow[b.bank] || 0;
+    const deducted = (held > 0 && Math.abs(b.position - held) < 0.05) ? held : 0;
+    if (!deducted) return Object.assign({}, b, { deducted: 0, grossPosition: b.position });
+    const position = b.position - deducted;
+    const util = b.limit > 0 ? position / b.limit * 100 : 0;
+    return Object.assign({}, b, {
+      position: position,
+      util: util,
+      /* the workbook's own threshold, Dashboard!J27 */
+      status: util > 80 ? 'warning' : 'ok',
+      deducted: deducted,
+      grossPosition: b.position,
+    });
+  });
+}
+
+function categoryDetailRow(b, split){
+  const has = split && split.length;
+  const subtotal = has ? split.reduce((s, x) => s + x.amount, 0) : 0;
+  const diff = b.position - subtotal;
+  const holdings = !has ? '' : `
+          <div class="cat-head">Fund categories held at ${escapeHtml(b.bank)} (PKR Mn)</div>
+          ${split.map(x => `
+          <div class="cat-line">
+            <span class="cat-name">${escapeHtml(x.category)}</span>
+            <span class="cat-amt">${fmt(x.amount)}</span>
+          </div>`).join('')}
+          <div class="cat-line cat-total">
+            <span class="cat-name">Total holdings</span>
+            <span class="cat-amt">${fmt(subtotal)}</span>
+          </div>`;
+  const adjustment = !b.deducted ? '' : `
+          <div class="cat-head"${has ? ' style="margin-top:12px"' : ''}>KRN Position adjustment (PKR Mn)</div>
+          <div class="cat-line">
+            <span class="cat-name">KRN Position per workbook</span>
+            <span class="cat-amt">${fmt(b.grossPosition)}</span>
+          </div>
+          <div class="cat-line">
+            <span class="cat-name">less escrow balances</span>
+            <span class="cat-amt">−${fmt(b.deducted)}</span>
+          </div>
+          <div class="cat-line cat-total">
+            <span class="cat-name">KRN Position (adjusted)</span>
+            <span class="cat-amt">${fmt(b.position)}</span>
+          </div>`;
+  /* Both figures are stated excluding T-Bills and escrow, yet they still differ:
+     the position is a limit-monitoring figure, not the sum of holdings. Say so
+     rather than inventing a balancing line. */
+  const note = (!has || Math.abs(diff) < 0.05) ? '' : `
+          <div class="cat-note">
+            Holdings and KRN Position both exclude T-Bill and escrow balances, but still
+            differ by ${diff > 0 ? '+' : '−'}${fmt(Math.abs(diff))} — the position is a
+            limit-monitoring figure computed on a different basis.
+          </div>`;
+  return `
+    <tr class="cat-detail" data-detail="${escapeHtml(b.bank)}"${expandedBanks.has(b.bank) ? '' : ' hidden'}>
+      <td colspan="8">
+        <div class="cat-panel">
+          ${holdings}
+          ${adjustment}
+          ${note}
+        </div>
+      </td>
+    </tr>`;
+}
+
+function renderExposureTable(){
+  const tbody = document.querySelector('#exposureTable tbody');
+  /* Hiding is presentation only — adjustedExposure() still returns every bank,
+     so nothing else that reads it loses rows. */
+  const rows = adjustedExposure()
+    .filter(b => !HIDDEN_BANK_KEYS.has(String(b.bank).trim().toLowerCase()))
+    .sort((a,b) => b.util - a.util);
+  const countEl = document.getElementById('exposureCount');
+  if (countEl) countEl.textContent = rows.length + ' banking relationships tracked';
+  tbody.innerHTML = rows.map(b => {
+    const isWarn = b.status === 'warning';
+    const fillColor = isWarn ? 'var(--warning)' : 'var(--blue-500)';
+    const badge = isWarn
+      ? `<span class="badge warning">⚡ Near Limit</span>`
+      : `<span class="badge good">✓ OK</span>`;
+    const split = BANK_CATEGORY_SPLIT[b.bank];
+    /* Banks whose position was all escrow have no categories left to list, but the
+       deduction still has to be inspectable, so they get a panel too. */
+    const hasDetail = (split && split.length) || b.deducted > 0;
+    const open = expandedBanks.has(b.bank);
+    const positionCell = hasDetail
+      ? `<button type="button" class="pos-toggle" data-bank="${escapeHtml(b.bank)}"
+                 aria-expanded="${open}" title="Show fund categories">
+           <span class="caret">${open ? '▾' : '▸'}</span>${fmt(b.position)}
+         </button>`
+      : fmt(b.position);
+    return `
+      <tr>
+        <td class="bank-name">${b.bank}</td>
+        <td><span class="badge cat">${b.category}</span></td>
+        <td>${b.rating}</td>
+        <td>${b.car}</td>
+        <td>${fmt(b.limit)}</td>
+        <td>${positionCell}</td>
+        <td>
+          <div class="util-cell">
+            <div class="util-track"><div class="util-fill" style="width:${Math.min(b.util,100)}%;background:${fillColor}"></div></div>
+            <span class="util-pct">${fmt(b.util)}%</span>
+          </div>
+        </td>
+        <td>${badge}</td>
+      </tr>
+      ${hasDetail ? categoryDetailRow(b, split) : ''}
+    `;
+  }).join('');
+
+  tbody.querySelectorAll('.pos-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const bank = btn.dataset.bank;
+      const detail = tbody.querySelector(`.cat-detail[data-detail="${CSS.escape(bank)}"]`);
+      const open = !expandedBanks.has(bank);
+      if (open) expandedBanks.add(bank); else expandedBanks.delete(bank);
+      if (detail) detail.hidden = !open;
+      btn.setAttribute('aria-expanded', String(open));
+      btn.querySelector('.caret').textContent = open ? '▾' : '▸';
+    });
+  });
+}
+
+function renderTBillsTable(){
+  const tbody = document.querySelector('#tbillsTable tbody');
+  tbody.innerHTML = TBILLS_DETAIL.map(t => `
+    <tr>
+      <td>${t.sr}</td>
+      <td class="bank-name">${t.bank}</td>
+      <td>${t.accountTitle}</td>
+      <td>${t.type}</td>
+      <td>${fmtDate(t.purchaseDate)}</td>
+      <td>${fmtDate(t.maturityDate)}</td>
+      <td>${t.daysToMaturity != null ? t.daysToMaturity : '—'}</td>
+      <td>${fmtPct(t.rate)}</td>
+      <td>${fmt(t.chequeValue/1000000)}</td>
+      <td>${fmt(t.faceValue/1000000)}</td>
+    </tr>
+  `).join('');
+  const total = TBILLS_DETAIL.reduce((s,t)=>s+t.chequeValue,0);
+  document.getElementById('tbillsSubtotal').textContent = fmt(total/1000000) + ' PKR Mn';
+  document.getElementById('tbillsCount').textContent = TBILLS_DETAIL.length + ' holding(s)';
+}
+
+function renderEscrowTable(){
+  const tbody = document.querySelector('#escrowTable tbody');
+  tbody.innerHTML = ESCROW_DETAIL.map(e => `
+    <tr>
+      <td>${e.sr}</td>
+      <td class="bank-name">${e.bank}</td>
+      <td>${e.programme}</td>
+      <td>${e.accountTitle}</td>
+      <td>${e.nature}</td>
+      <td><span class="badge cat">${e.category}</span></td>
+      <td>${e.accountNo}</td>
+      <td>${e.iban || '—'}</td>
+      <td>${e.accountType}</td>
+      <td>${fmtPct(e.rate)}</td>
+      <td>${fmt(e.availableBalance/1000000)}</td>
+      <td>${fmt(e.principalAmount/1000000)}</td>
+    </tr>
+  `).join('');
+  const total = ESCROW_DETAIL.reduce((s,e)=>s+e.principalAmount,0);
+  document.getElementById('escrowSubtotal').textContent = fmt(total/1000000) + ' PKR Mn';
+  document.getElementById('escrowCount').textContent = ESCROW_DETAIL.length + ' account(s)';
+}
+
+/* =========================================================
+   LIVE EXCEL SYNC
+   Reads data/Bank Report.xlsx and refreshes KPIS / FUNDS_CATEGORY /
+   GF_PROGRAM_USD / BANK_EXPOSURE / TBILLS_DETAIL / ESCROW_DETAIL in place.
+
+   Two modes, picked automatically:
+     · served over http(s) (i.e. launched via "Start Dashboard.bat") —
+       the page fetches data/Bank Report.xlsx itself and polls its
+       modified-time, so it reconnects and updates with no clicks at all.
+     · opened straight off disk as file:// — the browser forbids reading
+       neighbouring files, so we fall back to the File System Access
+       picker ("Connect Excel File") as before.
+   ========================================================= */
+const EXCEL_PATH = 'data/Bank Report.xlsx';
+const EXCEL_FILENAME = EXCEL_PATH.split('/').pop();
+const EXCEL_SUBDIR = EXCEL_PATH.includes('/') ? EXCEL_PATH.split('/')[0] : '';
+const POLL_MS = 3000;
+const SERVED_OVER_HTTP = location.protocol === 'http:' || location.protocol === 'https:';
+
+let fileHandle = null;
+let dirHandle = null;
+let lastStampSeen = null;
+let pollTimer = null;
+let syncInFlight = false;
+let refreshHooksBound = false;
+
+function setStatus(state, text){
+  document.getElementById('syncDot').className = 'sync-dot' + (state ? ' ' + state : '');
+  document.getElementById('syncStatusText').textContent = text;
+}
+
+/* ---------- IndexedDB: remember the picked file handle across reloads ---------- */
+const SYNC_DB_NAME = 'treasuryExcelSync';
+const SYNC_DB_STORE = 'handles';
+function openSyncDB(){
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(SYNC_DB_NAME, 1);
+    req.onupgradeneeded = () => { req.result.createObjectStore(SYNC_DB_STORE); };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+/* Two keys share the one store: 'excelDirHandle' is the data folder we prefer,
+   'excelHandle' is the older file-level handle kept so anyone already connected
+   is never forced to re-pick. */
+const DIR_HANDLE_KEY = 'excelDirHandle';
+const FILE_HANDLE_KEY = 'excelHandle';
+
+async function saveHandle(handle, key){
+  const db = await openSyncDB();
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(SYNC_DB_STORE, 'readwrite');
+    tx.objectStore(SYNC_DB_STORE).put(handle, key || FILE_HANDLE_KEY);
+    tx.oncomplete = () => resolve();
+    tx.onerror = () => reject(tx.error);
+  });
+}
+async function loadSavedHandle(key){
+  try {
+    const db = await openSyncDB();
+    return await new Promise((resolve, reject) => {
+      const tx = db.transaction(SYNC_DB_STORE, 'readonly');
+      const req = tx.objectStore(SYNC_DB_STORE).get(key || FILE_HANDLE_KEY);
+      req.onsuccess = () => resolve(req.result || null);
+      req.onerror = () => reject(req.error);
+    });
+  } catch(e){ return null; }
+}
+
+/* ---------- parsing helpers ---------- */
+function normalizeLabel(s){
+  return String(s == null ? '' : s).replace(/\s*\(PKR Mn\)\s*$/i, '').trim().toLowerCase();
+}
+function findRowByCol(aoa, colIdx, predicate){
+  for (let r = 0; r < aoa.length; r++){
+    if (predicate((aoa[r] || [])[colIdx])) return r;
+  }
+  return -1;
+}
+function findRowByColInRange(aoa, colIdx, fromRow, toRow, predicate){
+  for (let r = fromRow; r <= toRow && r < aoa.length; r++){
+    if (predicate((aoa[r] || [])[colIdx])) return r;
+  }
+  return -1;
+}
+function findLabelValue(aoa, matchLabel, rowLimit){
+  for (let r = 0; r < rowLimit; r++){
+    const row = aoa[r] || [];
+    for (const c of [1, 5]){ // column B or F
+      if (normalizeLabel(row[c]) === matchLabel){
+        const val = row[c + 2]; // value sits 2 columns right of its label
+        return typeof val === 'number' ? val : null;
+      }
+    }
+  }
+  return null;
+}
+
+const KPI_TARGETS = [
+  { match: 'total cash at bank', label: 'Total Cash at Bank', unit: 'PKR Mn' },
+  { match: 'savings accounts',   label: 'Savings Accounts',   unit: 'PKR Mn' },
+  { match: 'term deposits',      label: 'Term Deposits',      unit: 'PKR Mn' },
+  { match: 't-bills',            label: 'T-Bills',            unit: 'PKR Mn' },
+  { match: 'escrow funds',       label: 'Escrow Funds',       unit: 'PKR Mn' },
+  { match: 'total usd funds',    label: 'Total GF Funds',     unit: 'USD' },
+];
+function parseKPIsFromSheet(aoa){
+  const rowLimit = Math.min(aoa.length, 25);
+  const results = [];
+  for (const target of KPI_TARGETS){
+    const val = findLabelValue(aoa, target.match, rowLimit);
+    if (val == null) return null;
+    results.push({ label: target.label, value: target.unit === 'USD' ? Math.round(val) : val, unit: target.unit });
+  }
+  return results;
+}
+
+function parseUsdConversionRateFromSheet(aoa){
+  return findLabelValue(aoa, 'usd conversion rate', Math.min(aoa.length, 25));
+}
+
+function parseFundsCategoryFromSheet(aoa){
+  const headerRow = findRowByCol(aoa, 1, s => normalizeLabel(s).startsWith('fund category'));
+  if (headerRow === -1) return null;
+  const rows = [];
+  for (let r = headerRow + 1; r < aoa.length; r++){
+    const row = aoa[r] || [];
+    const name = row[1];
+    if (name == null || String(name).trim() === '') break;
+    if (normalizeLabel(name).startsWith('total')) break;
+    const amount = row[2];
+    if (typeof amount !== 'number') continue;
+    const pct = row[3];
+    rows.push({ category: String(name).trim(), amount, pct: typeof pct === 'number' ? pct * 100 : 0 });
+  }
+  return rows.length ? rows : null;
+}
+
+function parseGFProgramFromSheet(aoa){
+  const headerRow = findRowByCol(aoa, 10, s => normalizeLabel(s).startsWith('program gates foundation'));
+  if (headerRow === -1) return null;
+  const rows = [];
+  for (let r = headerRow + 1; r < aoa.length; r++){
+    const row = aoa[r] || [];
+    const name = row[10];
+    if (name == null || String(name).trim() === '') break;
+    if (normalizeLabel(name).startsWith('total')) break;
+    const usd = row[12];
+    if (typeof usd !== 'number') continue;
+    const pkr = row[13];
+    rows.push({ program: String(name).trim(), usd, pkr: typeof pkr === 'number' ? pkr : 0 });
+  }
+  return rows.length ? rows : null;
+}
+
+function parseBankExposureFromSheet(aoa){
+  const headerRow = findRowByCol(aoa, 1, s => normalizeLabel(s) === 'bank');
+  if (headerRow === -1) return null;
+  const rows = [];
+  for (let r = headerRow + 1; r < aoa.length; r++){
+    const row = aoa[r] || [];
+    const name = row[1];
+    if (name == null || String(name).trim() === '') break;
+    const category = row[2];
+    const rating = row[3];
+    const car = row[4];
+    const limit = row[6];
+    const position = row[7];
+    const util = row[8];
+    const statusText = String(row[9] || '');
+    rows.push({
+      bank: String(name).trim(),
+      category: category != null ? String(category).trim() : '',
+      rating: rating != null ? String(rating).trim() : '',
+      car: typeof car === 'number' ? (car * 100).toFixed(1) + '%' : String(car || ''),
+      limit: typeof limit === 'number' ? limit : 0,
+      position: typeof position === 'number' ? position : 0,
+      util: typeof util === 'number' ? util * 100 : 0,
+      status: /near limit|over limit/i.test(statusText) ? 'warning' : 'ok'
+    });
+  }
+  return rows.length ? rows : null;
+}
+
+function parseTBillsFromSheet(aoa){
+  const bannerRow = findRowByCol(aoa, 1, s => normalizeLabel(s).includes('t-bills'));
+  if (bannerRow === -1) return null;
+  const headerRow = findRowByColInRange(aoa, 2, bannerRow, bannerRow + 5, s => normalizeLabel(s) === 'bank');
+  if (headerRow === -1) return null;
+  const rows = [];
+  let collecting = false;
+  for (let r = headerRow + 1; r < aoa.length; r++){
+    const row = aoa[r] || [];
+    if (normalizeLabel(row[14]).startsWith('sub total')) break;
+    const bank = row[2];
+    const bankStr = bank == null ? '' : String(bank).trim();
+    if (bankStr === ''){
+      if (collecting) break;
+      continue;
+    }
+    const cheque = row[12];
+    if (typeof cheque !== 'number') break;
+    collecting = true;
+    rows.push({
+      sr: typeof row[1] === 'number' ? row[1] : rows.length + 1,
+      bank: bankStr,
+      accountTitle: row[6] != null ? String(row[6]).trim() : '',
+      type: row[7] != null ? String(row[7]).trim() : '',
+      purchaseDate: row[9] ?? null,
+      maturityDate: row[10] ?? null,
+      rate: typeof row[11] === 'number' ? row[11] : 0,
+      chequeValue: cheque,
+      faceValue: typeof row[13] === 'number' ? row[13] : 0,
+      daysToMaturity: typeof row[14] === 'number' ? row[14] : null,
+    });
+  }
+  return rows.length ? rows : null;
+}
+
+function parseEscrowFromSheet(aoa){
+  const headerRow = findRowByCol(aoa, 2, s => normalizeLabel(s) === 'bank');
+  if (headerRow === -1) return null;
+  const rows = [];
+  let collecting = false;
+  for (let r = headerRow + 1; r < aoa.length; r++){
+    const row = aoa[r] || [];
+    if (normalizeLabel(row[1]).startsWith('total')) break;
+    const bank = row[2];
+    const bankStr = bank == null ? '' : String(bank).trim();
+    if (bankStr === ''){
+      if (collecting) break;
+      continue;
+    }
+    const principal = row[16];
+    if (typeof principal !== 'number') break;
+    collecting = true;
+    rows.push({
+      sr: typeof row[1] === 'number' ? row[1] : rows.length + 1,
+      bank: bankStr,
+      programme: row[5] != null ? String(row[5]).trim() : '',
+      accountTitle: row[6] != null ? String(row[6]).trim() : '',
+      nature: row[7] != null ? String(row[7]).trim() : '',
+      category: row[8] != null ? String(row[8]).trim() : '',
+      accountNo: row[9] != null ? String(row[9]).trim() : '',
+      iban: row[10] != null ? String(row[10]).trim() : '',
+      accountType: row[11] != null ? String(row[11]).trim() : '',
+      rate: typeof row[12] === 'number' ? row[12] : 0,
+      currency: row[13] != null ? String(row[13]).trim() : 'PKR',
+      availableBalance: typeof row[15] === 'number' ? row[15] : 0,
+      principalAmount: principal,
+    });
+  }
+  return rows.length ? rows : null;
+}
+
+/* ---------- bank-wise fund category split ---------- */
+/* Breakup section heading -> the Fund Category name used on the Dashboard. */
+const BREAKUP_CATEGORIES = [
+  [/^lr funds/,           'LR Funds'],
+  [/^osr funds/,          'OSR Funds'],
+  [/^cdel funds/,         'Investment/CDEL Funds'],
+  [/^specified accounts/, 'RPA Accounts'],
+  [/^fip funds/,          'FIP'],
+  [/^wv ?greenfin/,       'WV Greenfin'],
+  [/^operational funds/,  'Operational Funds'],
+  [/^provident funds/,    'Provident Funds'],
+  [/^gratuity/,           'Gratuity'],
+];
+
+/* The sheet writes banks as short codes and free text ("Samba KCBL A/c"), while
+   the exposure table uses full names. */
+const BANK_ALIASES = [
+  ['bafl', 'Bank Alfalah Ltd'], ['ubl', 'United Bank Ltd'], ['hbl', 'Habib Bank Ltd'],
+  ['hmbl', 'Habib Metropolitan'], ['hmb', 'Habib Metropolitan'], ['faysal', 'Faysal Bank'],
+  ['samba', 'SAMBA Bank'], ['abl', 'Allied Bank Ltd'], ['mib', 'MCB Islamic Bank'],
+  ['mcb islamic', 'MCB Islamic Bank'], ['bipl', 'Bank Islami Pakistan Limited'],
+  ['jsbl', 'JS Bank Limited'], ['js bank', 'JS Bank Limited'], ['js', 'JS Bank Limited'],
+  ['meezan', 'Meezan Bank Ltd'], ['soneri', 'Soneri Bank Ltd'], ['snbl', 'Soneri Bank Ltd'],
+  ['nbp', 'National Bank of Pakistan'], ['bop', 'Bank of Punjab'],
+];
+const FCY_BANK = { 'Bank Alfalah Ltd': 'Bank Alfalah Ltd - FCY' };
+
+function bankNameFor(text, currency){
+  const s = ' ' + normalizeLabel(text).replace(/[^a-z0-9]+/g, ' ').trim() + ' ';
+  let hit = null, len = -1;
+  for (const [k, v] of BANK_ALIASES){
+    if (s.includes(' ' + k + ' ') && k.length > len){ len = k.length; hit = v; }
+  }
+  if (!hit) return null;
+  /* Alfalah holds the FCY book on its own exposure row. */
+  const cur = normalizeLabel(currency);
+  if (cur && cur !== 'pkr' && FCY_BANK[hit]) return FCY_BANK[hit];
+  return hit;
+}
+
+function accountSectionRows(aoa, bannerTest, amountCol){
+  const banner = findRowByCol(aoa, 1, s => bannerTest(normalizeLabel(s)));
+  if (banner === -1) return [];
+  const header = findRowByColInRange(aoa, 2, banner, banner + 4, s => normalizeLabel(s) === 'bank');
+  if (header === -1) return [];
+  const rows = [];
+  for (let r = header + 1; r < aoa.length; r++){
+    const row = aoa[r] || [];
+    const code = row[2] == null ? '' : String(row[2]).trim();
+    if (!code) break;
+    if (typeof row[amountCol] === 'number') rows.push({ code, amount: row[amountCol], row });
+  }
+  return rows;
+}
+
+function parseBankCategorySplitFromSheet(aoa){
+  const totals = {};   // bank -> category -> PKR
+  const addTo = (bank, category, pkr) => {
+    if (!bank || !category || typeof pkr !== 'number') return;
+    totals[bank] = totals[bank] || {};
+    totals[bank][category] = (totals[bank][category] || 0) + pkr;
+  };
+
+  /* 1. Breakup sections: label in column Q, amount in column R. */
+  let category = null;
+  for (let r = 0; r < aoa.length; r++){
+    const label = (aoa[r] || [])[16];
+    const text = label == null ? '' : String(label).trim();
+    if (!text) continue;
+    const low = normalizeLabel(text);
+    if (low.startsWith('total funds bucket')) break;   // summary block, not per-bank data
+    const heading = BREAKUP_CATEGORIES.find(e => e[0].test(low));
+    if (heading && (low.includes('breakup') || low.startsWith('specified accounts'))){
+      category = heading[1];
+      continue;
+    }
+    if (!category) continue;
+    if (low.startsWith('total')){ category = null; continue; }
+    addTo(bankNameFor(text), category, (aoa[r] || [])[17]);
+  }
+
+  /* 2. GF Funds has no breakup section, so read it off the GF-tagged accounts. */
+  const isGf = v => /^gf\b/.test(normalizeLabel(v));
+  accountSectionRows(aoa, s => s.includes('karandaaz savings accounts'), 15)
+    .forEach(x => { if (isGf(x.row[7]) || isGf(x.row[5])) addTo(bankNameFor(x.code, x.row[13]), 'GF Funds', x.amount); });
+  accountSectionRows(aoa, s => s.startsWith('term deposits'), 15)
+    .forEach(x => { if (isGf(x.row[5])) addTo(bankNameFor(x.code, x.row[13]), 'GF Funds', x.amount); });
+
+  const out = {};
+  for (const bank of Object.keys(totals)){
+    out[bank] = Object.keys(totals[bank])
+      .map(c => ({ category: c, amount: totals[bank][c] / 1000000 }))
+      .sort((a, b) => b.amount - a.amount);
+  }
+  return Object.keys(out).length ? out : null;
+}
+
+/* ---------- bank-wise GF programme attribution ---------- */
+/* Six of the eight GF programmes have accounts explicitly named after them (both
+   in the Karandaaz Savings Accounts and Term Deposits sections); PCDFI Funds and
+   PCDFI - McKinsey do not, so they always fall through to the pooled note below
+   rather than being guessed at. Reuses the same accountSectionRows/isGf/bankNameFor
+   helpers parseBankCategorySplitFromSheet already relies on for the "GF Funds"
+   category row, so a bank alias or section banner only has to be taught once. */
+function parseGFProgramBankFromSheet(aoa){
+  const banks = {};
+  const addBank = (key, bank) => { if (key && bank) (banks[key] = banks[key] || new Set()).add(bank); };
+  const isGf = v => /^gf\b/.test(normalizeLabel(v));
+  [ accountSectionRows(aoa, s => s.includes('karandaaz savings accounts'), 15),
+    accountSectionRows(aoa, s => s.startsWith('term deposits'), 15) ]
+    .forEach(rows => rows.forEach(x => {
+      if (!isGf(x.row[5])) return;
+      addBank(gfProgramKey(x.row[6]), bankNameFor(x.code, x.row[13]));
+    }));
+  const out = {};
+  Object.keys(banks).forEach(k => { out[k] = [...banks[k]].sort().join(' + '); });
+  ['pcdfi', 'mckinsey'].forEach(k => {
+    if (!out[k]) out[k] = 'UBL / Bank Alfalah Ltd (pooled — not tracked per programme)';
+  });
+  return out;
+}
+
+function applySyncedData(parsed){
+  if (parsed.kpis)          { KPIS.length = 0; KPIS.push(...parsed.kpis); }
+  if (parsed.fundsCategory) { FUNDS_CATEGORY.length = 0; FUNDS_CATEGORY.push(...parsed.fundsCategory); }
+  if (parsed.gfProgram)     { GF_PROGRAM_USD.length = 0; GF_PROGRAM_USD.push(...parsed.gfProgram); }
+  if (parsed.bankExposure)  { BANK_EXPOSURE.length = 0; BANK_EXPOSURE.push(...parsed.bankExposure); }
+  if (parsed.tbills)        { TBILLS_DETAIL.length = 0; TBILLS_DETAIL.push(...parsed.tbills); }
+  if (parsed.escrow)        { ESCROW_DETAIL.length = 0; ESCROW_DETAIL.push(...parsed.escrow); }
+  if (parsed.bankSplit)     { BANK_CATEGORY_SPLIT = parsed.bankSplit; }
+  if (parsed.gfProgramBank) { GF_PROGRAM_BANK = parsed.gfProgramBank; }
+  if (typeof parsed.usdRate === 'number') USD_CONVERSION_RATE = parsed.usdRate;
+  renderKPIs();
+  renderFundsCategory();
+  renderGFProgram();
+  renderGFProgramsTable();
+  renderExposureTable();
+  renderTBillsTable();
+  renderEscrowTable();
+}
+
+/* ---------- shared: turn an .xlsx buffer into a repainted dashboard ---------- */
+/* The sheets carry their own "as on" date in column B near the top; prefer that
+   over the file's last-saved timestamp, which is only a proxy for it. */
+function parseReportDateFromSheet(aoa){
+  for (let r = 0; r < Math.min(aoa.length, 8); r++){
+    const v = (aoa[r] || [])[1];
+    if (v instanceof Date && !isNaN(v.getTime())) return v;
+  }
+  return null;
+}
+
+function processWorkbookBuffer(buf, fallbackDate){
+  const wb = XLSX.read(buf, { type: 'array', sheets: ['Dashboard', 'Bank Report KRN', 'Escrow ICF'], cellDates: true });
+  if (!wb.SheetNames.includes('Dashboard')) throw new Error('"Dashboard" sheet not found');
+  const aoa = XLSX.utils.sheet_to_json(wb.Sheets['Dashboard'], { header: 1, raw: true, defval: null });
+  const tbillsAoa = wb.SheetNames.includes('Bank Report KRN')
+    ? XLSX.utils.sheet_to_json(wb.Sheets['Bank Report KRN'], { header: 1, raw: true, defval: null })
+    : null;
+  const escrowAoa = wb.SheetNames.includes('Escrow ICF')
+    ? XLSX.utils.sheet_to_json(wb.Sheets['Escrow ICF'], { header: 1, raw: true, defval: null })
+    : null;
+  const escrow = escrowAoa ? parseEscrowFromSheet(escrowAoa) : null;
+  const parsed = {
+    kpis: parseKPIsFromSheet(aoa),
+    fundsCategory: parseFundsCategoryFromSheet(aoa),
+    gfProgram: parseGFProgramFromSheet(aoa),
+    bankExposure: parseBankExposureFromSheet(aoa),
+    usdRate: parseUsdConversionRateFromSheet(aoa),
+    tbills: tbillsAoa ? parseTBillsFromSheet(tbillsAoa) : null,
+    escrow: escrow,
+    bankSplit: tbillsAoa ? parseBankCategorySplitFromSheet(tbillsAoa) : null,
+    gfProgramBank: tbillsAoa ? parseGFProgramBankFromSheet(tbillsAoa) : null,
+  };
+  applySyncedData(parsed);
+  const sheetDate = parseReportDateFromSheet(aoa);
+  if (sheetDate) setReportDate(sheetDate);
+  else if (fallbackDate) setReportDate(fallbackDate);
+  return Object.keys(parsed).filter(k => k !== 'usdRate' && parsed[k] === null);
+}
+
+function reportSyncResult(failedBlocks, label){
+  const at = new Date().toLocaleTimeString();
+  if (failedBlocks.length){
+    setStatus('warn', 'Synced with issues (' + failedBlocks.join(', ') + ' not found) · ' + at);
+  } else {
+    setStatus('ok', label + ' · ' + at);
+  }
+}
+
+/* ---------- connect / poll / sync ---------- */
+
+/* Locate the workbook inside a granted folder. Re-run on every reconnect so a
+   replaced file is picked up rather than clinging to a dead handle. */
+async function findWorkbookIn(handle){
+  const target = EXCEL_FILENAME.toLowerCase();
+  const spare = [];
+  for await (const [name, entry] of handle.entries()){
+    if (entry.kind !== 'file') continue;
+    /* Excel keeps a "~$Book.xlsx" lock file beside the real one while it's open. */
+    if (name.startsWith('~$')) continue;
+    if (name.toLowerCase() === target) return { handle: entry, name: name, exact: true };
+    if (name.toLowerCase().endsWith('.xlsx')) spare.push({ handle: entry, name: name });
+  }
+  /* Renamed but unambiguous — use it and say so rather than refusing to connect. */
+  if (spare.length === 1) return { handle: spare[0].handle, name: spare[0].name, exact: false };
+
+  /* Nothing here: the likely mistake is picking the dashboard folder rather than
+     the "data" folder inside it, so look one level down before giving up.
+     Recursion stops immediately — there is no data/data to descend into. */
+  if (EXCEL_SUBDIR && typeof handle.getDirectoryHandle === 'function'){
+    try {
+      return await findWorkbookIn(await handle.getDirectoryHandle(EXCEL_SUBDIR));
+    } catch(e){ /* no such subfolder */ }
+  }
+  return null;
+}
+
+/* Adopt a granted folder: find the workbook in it and start syncing. */
+async function useDirectoryHandle(handle){
+  const found = await findWorkbookIn(handle);
+  if (!found){
+    setStatus('err', 'No ' + EXCEL_FILENAME + ' in folder "' + handle.name + '" — pick the "data" folder');
+    return false;
+  }
+  dirHandle = handle;
+  fileHandle = found.handle;
+  lastStampSeen = null;
+  startPolling(checkAndSync);
+  await checkAndSync();
+  if (!found.exact) setStatus('warn', 'Connected to "' + found.name + '" (expected ' + EXCEL_FILENAME + ')');
+  return true;
+}
+
+/* A remembered handle can be stale (folder moved or deleted), in which case
+   requestPermission throws. Swallow that so we fall through to the picker
+   instead of leaving the button stuck on an error. */
+async function grantedFor(handle){
+  try { return (await handle.requestPermission({ mode: 'read' })) === 'granted'; }
+  catch(e){ return false; }
+}
+
+/* Runs from the button's click handler, which supplies the user gesture that
+   requestPermission() and showDirectoryPicker() both require. */
+async function connectExcelFile(){
+  try {
+    /* 1. Remembered folder — one "Allow" prompt, no file browsing. */
+    const savedDir = await loadSavedHandle(DIR_HANDLE_KEY);
+    if (savedDir && await grantedFor(savedDir)){
+      if (await useDirectoryHandle(savedDir)) return;
+    }
+
+    /* 2. Older file-level handle, so an existing connection keeps working. */
+    const savedFile = await loadSavedHandle(FILE_HANDLE_KEY);
+    if (savedFile && await grantedFor(savedFile)){
+      fileHandle = savedFile;
+      lastStampSeen = null;
+      startPolling(checkAndSync);
+      await checkAndSync();
+      return;
+    }
+
+    /* 3. Nothing usable remembered — ask once for the folder. */
+    const picked = await window.showDirectoryPicker({ id: 'krnTreasuryData', mode: 'read', startIn: 'desktop' });
+    if (await useDirectoryHandle(picked)) await saveHandle(picked, DIR_HANDLE_KEY);
+  } catch(e){
+    if (e.name !== 'AbortError') setStatus('err', 'Could not connect: ' + e.message);
+  }
+}
+
+function startPolling(tick){
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(tick, POLL_MS);
+  /* Bind the wake-up hooks once — startPolling runs again on every reconnect. */
+  if (!refreshHooksBound){
+    refreshHooksBound = true;
+    document.addEventListener('visibilitychange', () => { if (!document.hidden && pollTimer) tick(); });
+    window.addEventListener('focus', () => { if (pollTimer) tick(); });
+  }
+}
+
+/* ---------- mode 1: file picker (file://) ---------- */
+async function checkAndSync(){
+  if (!fileHandle || syncInFlight) return;
+  let perm;
+  try { perm = await fileHandle.queryPermission({ mode: 'read' }); }
+  catch(e){ setStatus('err', 'Sync error — click Reconnect'); return; }
+  if (perm !== 'granted'){ setStatus('warn', 'Permission needed — click Reconnect'); return; }
+
+  let file;
+  try { file = await fileHandle.getFile(); }
+  catch(e){
+    /* Excel saves by writing a temp file and replacing the original, which can
+       leave the old handle pointing at nothing. With a folder grant we can just
+       look the workbook up again. */
+    if (!dirHandle){ setStatus('err', 'Could not read file — click Reconnect'); return; }
+    try {
+      const found = await findWorkbookIn(dirHandle);
+      if (!found) throw new Error('not found');
+      fileHandle = found.handle;
+      file = await fileHandle.getFile();
+    } catch(e2){
+      setStatus('err', 'Could not read ' + EXCEL_FILENAME + ' — click Reconnect');
+      return;
+    }
+  }
+  const stamp = file.lastModified + ':' + file.size;
+  if (stamp === lastStampSeen) return;
+
+  syncInFlight = true;
+  setStatus('busy', 'Syncing…');
+  try {
+    const buf = await file.arrayBuffer();
+    const failed = processWorkbookBuffer(buf, file.lastModified);
+    /* Only commit the stamp once the parse succeeded, so a workbook caught
+       mid-save is retried on the next tick instead of being skipped. */
+    lastStampSeen = stamp;
+    reportSyncResult(failed, 'Synced');
+  } catch(err){
+    console.error('Excel sync failed', err);
+    setStatus('err', 'Sync failed: ' + err.message + ' (showing last good data)');
+  } finally {
+    syncInFlight = false;
+  }
+}
+
+/* ---------- mode 2: automatic, over http ---------- */
+async function fetchExcelStamp(){
+  /* The bundled server.js exposes a cheap mtime endpoint so the 3s poll
+     doesn't re-download the workbook. */
+  try {
+    const res = await fetch('api/excel-mtime', { cache: 'no-store' });
+    if (res.ok){
+      const info = await res.json();
+      if (info && info.mtimeMs) return { stamp: info.mtimeMs + ':' + info.size, mtimeMs: info.mtimeMs };
+    }
+  } catch(e){ /* not our server — fall through to a plain HEAD */ }
+
+  const res = await fetch(EXCEL_PATH, { method: 'HEAD', cache: 'no-store' });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  const lm = res.headers.get('Last-Modified');
+  const len = res.headers.get('Content-Length');
+  /* A server that reports neither header gives us nothing to compare, so treat
+     every tick as a change rather than going permanently stale. */
+  if (!lm && !len) return { stamp: String(Date.now()), mtimeMs: 0 };
+  return { stamp: (lm || '') + ':' + (len || ''), mtimeMs: lm ? Date.parse(lm) : 0 };
+}
+
+async function httpCheckAndSync(){
+  if (syncInFlight) return;
+  let info;
+  try { info = await fetchExcelStamp(); }
+  catch(e){ setStatus('err', 'Cannot reach ' + EXCEL_PATH + ' — is the server still running?'); return; }
+  if (info.stamp === lastStampSeen) return;
+
+  syncInFlight = true;
+  setStatus('busy', 'Syncing…');
+  try {
+    const res = await fetch(EXCEL_PATH + '?t=' + Date.now(), { cache: 'no-store' });
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const buf = await res.arrayBuffer();
+    const failed = processWorkbookBuffer(buf, info.mtimeMs || null);
+    lastStampSeen = info.stamp;
+    reportSyncResult(failed, 'Auto-synced');
+  } catch(err){
+    console.error('Excel sync failed', err);
+    setStatus('err', 'Sync failed: ' + err.message + ' (showing last good data)');
+  } finally {
+    syncInFlight = false;
+  }
+}
+
+/* ---------- pick a mode on load ---------- */
+async function initSync(){
+  if (SERVED_OVER_HTTP){
+    document.getElementById('connectExcelBtn').style.display = 'none';
+    setStatus('busy', 'Connecting to ' + EXCEL_PATH + '…');
+    startPolling(httpCheckAndSync);
+    await httpCheckAndSync();
+    return;
+  }
+
+  if (!('showDirectoryPicker' in window)){
+    document.getElementById('syncStatus').style.display = 'none';
+    return;
+  }
+  const btn = document.getElementById('connectExcelBtn');
+
+  /* Prefer the remembered folder; fall back to an older file-level handle. */
+  const savedDir = await loadSavedHandle(DIR_HANDLE_KEY);
+  const savedFile = savedDir ? null : await loadSavedHandle(FILE_HANDLE_KEY);
+  const saved = savedDir || savedFile;
+  if (!saved){
+    btn.textContent = 'Connect data folder';
+    /* Opened off disk, so auto-sync is unavailable. Point at the launcher that
+       enables it rather than only offering the manual folder grant. */
+    setStatus('warn', 'Not connected — run "Start Dashboard.bat" for automatic sync, or click "Connect data folder"');
+    return;
+  }
+
+  btn.textContent = 'Reconnect Excel File';
+  let perm;
+  try { perm = await saved.queryPermission({ mode: 'read' }); }
+  catch(e){ setStatus('warn', 'Click Reconnect to resume auto-sync'); return; }
+
+  /* Still granted from a previous visit — connect with no click at all.
+     requestPermission() cannot be used here: there is no user gesture on load. */
+  if (perm === 'granted'){
+    if (savedDir) await useDirectoryHandle(savedDir);
+    else {
+      fileHandle = savedFile;
+      startPolling(checkAndSync);
+      await checkAndSync();
+    }
+  } else {
+    setStatus('warn', 'Click Reconnect to resume auto-sync');
+  }
+}
+document.getElementById('connectExcelBtn').addEventListener('click', connectExcelFile);
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+/* ---------- theme toggle ---------- */
+function syncThemeIcon(){
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.getElementById('iconSun').style.display = isDark ? 'none' : '';
+  document.getElementById('iconMoon').style.display = isDark ? '' : 'none';
+}
+document.getElementById('themeToggle').addEventListener('click', () => {
+  const current = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  const next = current === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('treasuryTheme', next);
+  syncThemeIcon();
+});
+
+/* ---------- init ---------- */
+syncThemeIcon();
+renderKPIs();
+renderFundsCategory();
+renderGFProgram();
+renderGFProgramsTable();
+renderExposureTable();
+renderTBillsTable();
+renderEscrowTable();
+initSync();
+</script>
+</body>
+</html>
